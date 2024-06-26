@@ -42,24 +42,22 @@ form.addEventListener('submit', async e => {
     const data = await fetchImages(query, page, perPage);
     maxPage = Math.ceil(data.totalHits / perPage);
 
-    if (maxPage === 0) {
-      showError('Empty Result');
-      hideLoader(loader);
-      updateBtnStatus(page, maxPage, btnLoadMore);
-      return;
-    }
-
     if (data.hits.length === 0) {
-      gallery.innerHTML = '';
       showError(
         'Sorry, there are no images matching your search query. Please try again!'
       );
+      hideLoader(loader);
       return;
     }
-    showLoadMore(btnLoadMore);
+
     renderImageGallery(data.hits);
+
+    if (data.totalHits > perPage) {
+      showLoadMore(btnLoadMore);
+    } else {
+      hideLoadMore(btnLoadMore);
+    }
   } catch (error) {
-    gallery.innerHTML = '';
     showError('Something went wrong. Please try again later.');
   } finally {
     hideLoader(loader);
@@ -82,12 +80,16 @@ btnLoadMore.addEventListener('click', async () => {
     }
 
     renderImageGallery(data.hits);
+
+    if (page < maxPage) {
+      showLoadMore(btnLoadMore);
+    } else {
+      hideLoadMore(btnLoadMore);
+    }
   } catch (error) {
-    gallery.innerHTML = '';
     showError('Something went wrong. Please try again later.');
   } finally {
     hideLoader(loader);
-    updateBtnStatus(page, maxPage, btnLoadMore);
     smoothScroll();
   }
 });
